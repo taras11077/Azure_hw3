@@ -49,7 +49,7 @@ public class UserService
 
 
 	// Оновлення користувача
-	public async Task UpdateAsync(string rowKey, string? newPicturePath = null)
+	public async Task UpdateAsync(string rowKey, string? newName = null, string? newEmail = null, string? newPicturePath = null)
 	{
 		var user = await GetUserByRowKeyAsync(rowKey);
 
@@ -58,20 +58,40 @@ public class UserService
 			throw new Exception("User not found.");
 		}
 
+		bool isUpdated = false;
+
+		if (!string.IsNullOrEmpty(newName) && user.Name != newName)
+		{
+			user.Name = newName;
+			isUpdated = true;
+		}
+
+
+		if (!string.IsNullOrEmpty(newEmail) && user.Email != newEmail)
+		{
+			user.Email = newEmail;
+			isUpdated = true;
+		}
+
+		// оновлення зображення, якщо передано новий шлях до зображення
 		if (!string.IsNullOrEmpty(newPicturePath))
 		{
 			var container = await _blobService.GetContainer(_blobContainerName);
 
-			// завантаження нового зображення до Blob Storage
-			await _blobService.AddBlob(container, newPicturePath);
+			// завантаження нового зображення до Blob Storage та отримання нового унікального імені блоба
+			var uniqueBlobName = await _blobService.AddBlob(container, newPicturePath);
 
-			// оновлення URL для нового зображення
-			var pictureName = Path.GetFileName(newPicturePath);
-			user.Picture = container.GetBlobClient(pictureName).Uri.ToString();
+			// оновлення URL для нового зображення, якщо воно змінилося
+			var newPictureUrl = container.GetBlobClient(uniqueBlobName).Uri.ToString();
+			if (user.Picture != newPictureUrl)
+			{
+				user.Picture = newPictureUrl;
+				isUpdated = true;
+			}
 		}
 
-		// оновлення користувача в Table Storage
-		await _tableRepository.UpdateEntity(user);
+		if (isUpdated)
+			await _tableRepository.UpdateEntity(user);
 	}
 
 

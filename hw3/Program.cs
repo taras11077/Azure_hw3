@@ -16,25 +16,29 @@ var userService = new UserService(tableRepository, blobService);
 
 
 // додавання
-string picturePath = @"C:\Users\Master\Desktop\Images2\image3.jpg";
+string picturePath = @"C:\Users\Master\Desktop\Images2\image2.jpg";
 
 var newUser = new User
 {
-	Name = "Vasyl",
+	Name = "Mykola",
 	Email = "vasyl@gmail.com",
 	Picture = picturePath,
 };
 
-await userService.AddAsync(newUser);
+//await userService.AddAsync(newUser);
 
 
 // оновлення
-string rk = "b37f9784-9c95-47d8-a102-212cb1979346";
+string rk = "18211faf-682d-4b27-8a57-c1ab27879e3d";
+
+string newName = "Mykola";
+string newEmail = "mykola@gmail.com";
 string newPicture = @"C:\Users\Master\Desktop\Images2\image4.jpg";
-await userService.UpdateAsync(rk, newPicture);
+
+await userService.UpdateAsync(rk, newName, newEmail, newPicture);
 
 // видалення
-//await userService.DeleteAsync("User", "40cdbc53-2aee-45a3-914b-3806900ebfc5");
+await userService.DeleteAsync("User", "3010e71b-c0d3-4a6b-8ddc-ffb60761bfb6");
 
 
 // показати всіх

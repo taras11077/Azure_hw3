@@ -22,10 +22,15 @@ public class BlobService
 	}
 
 	// створення блоба
-	public async Task AddBlob(BlobContainerClient container, string path)
+	public async Task<string> AddBlob(BlobContainerClient container, string path)
 	{
-		var name = Path.GetFileName(path);
-		BlobClient blobClient = container.GetBlobClient(name);
+		var originalName = Path.GetFileNameWithoutExtension(path);  // ім'я файлу без розширення
+		var extension = Path.GetExtension(path);  // розширення файлу
+
+		// нове унікальне ім'я
+		var uniqueName = $"{originalName}_{Guid.NewGuid()}{extension}";
+
+		BlobClient blobClient = container.GetBlobClient(uniqueName);
 
 		if (!File.Exists(path))
 		{
@@ -33,8 +38,13 @@ public class BlobService
 		}
 
 		await blobClient.UploadAsync(path);
-		Console.WriteLine($"Blob '{name}' was uploaded to Azure");
+		Console.WriteLine($"Blob '{uniqueName}' was uploaded to Azure");
+
+		return uniqueName;
 	}
+
+
+
 
 	// показати всі блоби контейнера
 	public async Task DisplayBlobs(BlobContainerClient container)
